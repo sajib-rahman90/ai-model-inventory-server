@@ -73,6 +73,18 @@ async function run() {
       });
     });
 
+    //create delete api for delete any model in client server
+    app.delete("/models/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await modelsCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
