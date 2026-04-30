@@ -123,6 +123,15 @@ async function run() {
       res.send(result);
     });
 
+    //create get api for showing Users create models into My models pages in client server
+    app.get("/my-models", async (req, res) => {
+      const email = req.query.email;
+      const result = await modelsCollection
+        .find({ createdBy: email })
+        .toArray();
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
