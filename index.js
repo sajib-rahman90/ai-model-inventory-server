@@ -3,6 +3,8 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const admin = require("firebase-admin");
+const serviceAccount = require("./serviceKey.json");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,6 +12,11 @@ const port = process.env.PORT || 3000;
 // middleware
 app.use(cors());
 app.use(express.json());
+
+// Firebase Admin SDK implemantation
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hihlt50.mongodb.net/?appName=Cluster0`;
 
@@ -21,6 +28,26 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
+// Firebase Admin SDK verifyToken implemantation
+const verifyToken = async (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({
+      message: "Unauthorized access. Token not found!",
+    });
+  }
+  const token = authorization.split(" ")[1];
+
+  try {
+    await admin.auth().verifyIdToken(token);
+    next();
+  } catch (error) {
+    res.status(401).send({
+      message: "Unauthorized access.",
+    });
+  }
+};
 
 async function run() {
   try {
@@ -46,7 +73,7 @@ async function run() {
     });
 
     //create get api for showing model-details page
-    app.get("/models/:id", async (req, res) => {
+    app.get("/models/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const objectId = new ObjectId(id);
       const result = await modelsCollection.findOne({ _id: objectId });
