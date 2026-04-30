@@ -55,6 +55,7 @@ async function run() {
 
     const db = client.db("ai-model-db");
     const modelsCollection = db.collection("models");
+    const purchaseCollection = db.collection("purchases");
 
     //get modelsCollections data in database.
     app.get("/models", async (req, res) => {
@@ -128,6 +129,22 @@ async function run() {
       const email = req.query.email;
       const result = await modelsCollection
         .find({ createdBy: email })
+        .toArray();
+      res.send(result);
+    });
+
+    //create Post api for My Model Purchase pages
+    app.post("/purchase", async (req, res) => {
+      const data = req.body;
+      const result = await purchaseCollection.insertOne(data);
+      res.send(result);
+    });
+
+    //create Get api for My Model Purchase pages
+    app.get("/my-purchase", async (req, res) => {
+      const email = req.query.email;
+      const result = await purchaseCollection
+        .find({ purchasedBy: email })
         .toArray();
       res.send(result);
     });
