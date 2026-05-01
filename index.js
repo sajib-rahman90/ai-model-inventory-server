@@ -134,10 +134,19 @@ async function run() {
     });
 
     //create Post api for My Model Purchase pages
-    app.post("/purchase", async (req, res) => {
+    app.post("/purchase/:id", async (req, res) => {
       const data = req.body;
+      const id = req.params.id;
       const result = await purchaseCollection.insertOne(data);
-      res.send(result);
+
+      const filter = { _id: new ObjectId(id) };
+      const update = {
+        $inc: {
+          purchased: 1,
+        },
+      };
+      const purchasCounted = await modelsCollection.updateOne(filter, update);
+      res.send(result, purchasCounted);
     });
 
     //create Get api for My Model Purchase pages
