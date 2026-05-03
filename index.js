@@ -86,7 +86,7 @@ async function run() {
     });
 
     //create put api for update model in client server
-    app.put("/models/:id", async (req, res) => {
+    app.put("/models/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const data = req.body;
       const objectId = new ObjectId(id);
@@ -102,7 +102,7 @@ async function run() {
     });
 
     //create delete api for delete any model in client server
-    app.delete("/models/:id", async (req, res) => {
+    app.delete("/models/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const result = await modelsCollection.deleteOne({
         _id: new ObjectId(id),
