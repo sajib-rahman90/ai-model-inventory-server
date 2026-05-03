@@ -167,6 +167,15 @@ async function run() {
       res.send(result);
     });
 
+    //create Get api for Random Models Slider show on home page
+    app.get("/random-models", async (req, res) => {
+      const result = await modelsCollection
+        .aggregate([{ $sample: { size: 6 } }])
+        .toArray();
+
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
