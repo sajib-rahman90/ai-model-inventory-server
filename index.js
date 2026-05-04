@@ -137,6 +137,17 @@ async function run() {
     app.post("/purchase/:id", async (req, res) => {
       const data = req.body;
       const id = req.params.id;
+      const existing = await purchaseCollection.findOne({
+        modelId: data.modelId,
+        purchasedBy: data.purchasedBy,
+      });
+
+      if (existing) {
+        return res.send({
+          success: false,
+          message: "You already purchased this model",
+        });
+      }
       const result = await purchaseCollection.insertOne(data);
 
       const filter = { _id: new ObjectId(id) };
@@ -146,7 +157,11 @@ async function run() {
         },
       };
       const purchasCounted = await modelsCollection.updateOne(filter, update);
-      res.send(result, purchasCounted);
+      res.send({
+        success: true,
+        result,
+        purchasCounted,
+      });
     });
 
     //create Get api for My Model Purchase pages
@@ -173,6 +188,14 @@ async function run() {
         .aggregate([{ $sample: { size: 6 } }])
         .toArray();
 
+      res.send(result);
+    });
+
+    //create Get api for Filter in All Models
+    app.get("/filter", async (req, res) => {
+      const { framework } = req.query;
+      const query = framework ? { framework } : {};
+      const result = await modelsCollection.find(query).toArray();
       res.send(result);
     });
 
