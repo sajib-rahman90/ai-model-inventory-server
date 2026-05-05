@@ -4,15 +4,17 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const admin = require("firebase-admin");
+
+require("dotenv").config();
+const app = express();
+const port = process.env.PORT || 3000;
+
 // index.js
 const decoded = Buffer.from(
   process.env.FIREBASE_SERVICE_KEY,
   "base64",
 ).toString("utf8");
 const serviceAccount = JSON.parse(decoded);
-require("dotenv").config();
-const app = express();
-const port = process.env.PORT || 3000;
 
 // middleware
 app.use(cors());
